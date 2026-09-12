@@ -14,6 +14,7 @@ export default function ClientDetailPage() {
   const [products, setProducts] = useState([]);
   const [productTotals, setProductTotals] = useState({});
   const [clientTotals, setClientTotals] = useState(null);
+  const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -26,12 +27,17 @@ export default function ClientDetailPage() {
 
   async function loadData() {
     setLoading(true);
-    const [{ data: clientData }, { data: productsData }, { data: totalsData }, { data: clientTotalsData }] =
+    const [{ data: clientData }, { data: productsData }, { data: totalsData }, { data: clientTotalsData }, { data: paymentsData }] =
       await Promise.all([
         supabase.from('clients').select('*').eq('id', id).single(),
         supabase.from('products').select('*').eq('client_id', id).order('order_date', { ascending: false }),
         supabase.from('product_totals').select('*'),
         supabase.from('client_totals').select('*').eq('client_id', id).single(),
+        supabase
+          .from('payments')
+          .select('*, products!inner(id, description, type, client_id)')
+          .eq('products.client_id', id)
+          .order('payment_date', { ascending: false }),
       ]);
     setClient(clientData);
     setProducts(productsData || []);
@@ -41,6 +47,7 @@ export default function ClientDetailPage() {
     });
     setProductTotals(map);
     setClientTotals(clientTotalsData);
+    setPayments(paymentsData || []);
     setLoading(false);
   }
 
@@ -238,6 +245,41 @@ export default function ClientDetailPage() {
                 </tr>
               );
             })}
+          </tbody>
+        </table>
+      )}
+
+      <div className="topbar">
+        <h2>Versements</h2>
+      </div>
+
+      {payments.length === 0 ? (
+        <div className="empty-state">Aucun versement pour ce client.</div>
+      ) : (
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Pièce</th>
+              <th>Montant</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payments.map((p) => (
+              <tr key={p.id}>
+                <td>{new Date(p.payment_date).toLocaleDateString('fr-FR')}</td>
+                <td>
+                  {p.products ? (
+                    <Link href={`/products/${p.products.id}`}>{p.products.description || p.products.type}</Link>
+                  ) : (
+                    '—'
+                  )}
+                </td>
+                <td>{Number(p.amount).toLocaleString('fr-FR')} DA</td>
+                <td>{p.note || '—'}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       )}
