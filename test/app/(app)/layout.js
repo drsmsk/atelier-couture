@@ -54,4 +54,18 @@ export default function AppLayout({ children }) {
           <Link href="/products" className={pathname.startsWith('/products') ? 'active' : ''}>
             Pièces
           </Link>
-          <Link href="/versements"
+          <Link href="/versements" className={pathname.startsWith('/versements') ? 'active' : ''}>
+            Versements
+          </Link>
+        </nav>
+        <div className="sidebar-footer">
+          <span className="sidebar-email">{email}</span>
+          <button className="btn btn-ghost" onClick={handleLogout}>
+            Se déconnecter
+          </button>
+        </div>
+      </aside>
+      <main className="main">{children}</main>
+    </div>
+  );
+}
