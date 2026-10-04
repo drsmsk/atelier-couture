@@ -57,6 +57,9 @@ export default function AppLayout({ children }) {
           <Link href="/versements" className={pathname.startsWith('/versements') ? 'active' : ''}>
             Versements
           </Link>
+          <Link href="/articles" className={pathname.startsWith('/articles') ? 'active' : ''}>
+            Articles
+          </Link>
         </nav>
         <div className="sidebar-footer">
           <span className="sidebar-email">{email}</span>
